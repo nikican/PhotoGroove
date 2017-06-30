@@ -13,8 +13,18 @@ type alias Photo =
 
 type alias Model =
     { photos : List Photo
-    , selectedUrl : String
+    , selectedUrl : Maybe String
+    , loadingError : Maybe String
     , chosenSize : ThumbnailSize
+    }
+
+
+initialModel : Model
+initialModel =
+    { photos = []
+    , selectedUrl = Nothing
+    , loadingError = Nothing
+    , chosenSize = Medium
     }
 
 
@@ -48,20 +58,16 @@ view model =
             List.map (viewSizeChooser model.chosenSize) [ Small, Medium, Large ]
         , div [ id "thumbnails", class <| sizeToClass model.chosenSize ] <|
             List.map (viewThumbnail model.selectedUrl) model.photos
-        , img
-            [ class "large"
-            , src (urlPrefix ++ "large/" ++ model.selectedUrl)
-            ]
-            []
+        , viewLarge model.selectedUrl
         ]
 
 
-viewThumbnail : String -> Photo -> Html Msg
+viewThumbnail : Maybe String -> Photo -> Html Msg
 viewThumbnail selectedUrl thumbnail =
     img
         [ src (urlPrefix ++ thumbnail.url)
         , classList
-            [ ( "selected", selectedUrl == thumbnail.url ) ]
+            [ ( "selected", selectedUrl == Just thumbnail.url ) ]
         , onClick <| SelectByUrl thumbnail.url
         ]
         []
@@ -107,52 +113,46 @@ sizeToClass size =
             "large"
 
 
-initialModel : Model
-initialModel =
-    { photos =
-        [ { url = "1.jpeg" }
-        , { url = "2.jpeg" }
-        , { url = "3.jpeg" }
-        ]
-    , selectedUrl = "1.jpeg"
-    , chosenSize = Medium
-    }
-
-
-photoArray : Array { url : String }
-photoArray =
-    Array.fromList initialModel.photos
-
-
-getPhotoUrl : Int -> String
-getPhotoUrl index =
-    case Array.get index photoArray of
-        Just photo ->
-            photo.url
-
+viewLarge : Maybe String -> Html Msg
+viewLarge selectedUrl =
+    case selectedUrl of
         Nothing ->
-            ""
+            text ""
 
-
-randomPhotoPicker : Random.Generator Int
-randomPhotoPicker =
-    Random.int 0 (Array.length photoArray - 1)
+        Just url ->
+            img
+                [ class "large"
+                , src (urlPrefix ++ "large/" ++ url)
+                ]
+                []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SelectByUrl url ->
-            ( { model | selectedUrl = url }, Cmd.none )
+            ( { model | selectedUrl = Just url }, Cmd.none )
 
         SurpriseMe ->
-            ( model, Random.generate SelectByIndex randomPhotoPicker )
+            let
+                randomPhotoPicker =
+                    Random.int 0 (List.length model.photos - 1)
+            in
+                ( model, Random.generate SelectByIndex randomPhotoPicker )
 
         SetSize size ->
             ( { model | chosenSize = size }, Cmd.none )
 
         SelectByIndex index ->
-            ( { model | selectedUrl = getPhotoUrl index }, Cmd.none )
+            let
+                newSelectedUrl : Maybe String
+                newSelectedUrl =
+                    model.photos
+                        |> Array.fromList
+                        |> Array.get index
+                        |> Maybe.map .url
+            in
+                ( { model | selectedUrl = newSelectedUrl }, Cmd.none )
 
 
 main : Program Never Model Msg
