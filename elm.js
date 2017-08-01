@@ -9492,6 +9492,26 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
+var _user$project$PhotoGroove$onImmediateValueChange = function (toMsg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'immediate-value-changed',
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			toMsg,
+			A2(
+				_elm_lang$core$Json_Decode$at,
+				{
+					ctor: '::',
+					_0: 'target',
+					_1: {
+						ctor: '::',
+						_0: 'immediateValue',
+						_1: {ctor: '[]'}
+					}
+				},
+				_elm_lang$core$Json_Decode$int)));
+};
 var _user$project$PhotoGroove$paperSlider = _elm_lang$html$Html$node('paper-slider');
 var _user$project$PhotoGroove$sizeToClass = function (size) {
 	var _p0 = size;
@@ -9515,8 +9535,8 @@ var _user$project$PhotoGroove$sizeToString = function (size) {
 			return 'large';
 	}
 };
-var _user$project$PhotoGroove$viewFilter = F2(
-	function (name, magnitude) {
+var _user$project$PhotoGroove$viewFilter = F3(
+	function (name, toMsg, magnitude) {
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -9541,7 +9561,11 @@ var _user$project$PhotoGroove$viewFilter = F2(
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$max('11'),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: _user$project$PhotoGroove$onImmediateValueChange(toMsg),
+								_1: {ctor: '[]'}
+							}
 						},
 						{ctor: '[]'}),
 					_1: {
@@ -9602,10 +9626,19 @@ var _user$project$PhotoGroove$photoDecoder = A4(
 			'url',
 			_elm_lang$core$Json_Decode$string,
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$PhotoGroove$Photo))));
-var _user$project$PhotoGroove$Model = F4(
-	function (a, b, c, d) {
-		return {photos: a, selectedUrl: b, loadingError: c, chosenSize: d};
+var _user$project$PhotoGroove$Model = F7(
+	function (a, b, c, d, e, f, g) {
+		return {photos: a, selectedUrl: b, loadingError: c, chosenSize: d, hue: e, ripple: f, noise: g};
 	});
+var _user$project$PhotoGroove$SetNoise = function (a) {
+	return {ctor: 'SetNoise', _0: a};
+};
+var _user$project$PhotoGroove$SetRipple = function (a) {
+	return {ctor: 'SetRipple', _0: a};
+};
+var _user$project$PhotoGroove$SetHue = function (a) {
+	return {ctor: 'SetHue', _0: a};
+};
 var _user$project$PhotoGroove$LoadPhotos = function (a) {
 	return {ctor: 'LoadPhotos', _0: a};
 };
@@ -9668,7 +9701,7 @@ var _user$project$PhotoGroove$update = F2(
 						{selectedUrl: newSelectedUrl}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'LoadPhotos':
 				if (_p3._0.ctor === 'Ok') {
 					var _p4 = _p3._0._0;
 					return {
@@ -9697,6 +9730,27 @@ var _user$project$PhotoGroove$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
+			case 'SetHue':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{hue: _p3._0}),
+					{ctor: '[]'});
+			case 'SetRipple':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{ripple: _p3._0}),
+					{ctor: '[]'});
+			default:
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{noise: _p3._0}),
+					{ctor: '[]'});
 		}
 	});
 var _user$project$PhotoGroove$SetSize = function (a) {
@@ -9795,7 +9849,10 @@ var _user$project$PhotoGroove$initialModel = {
 	photos: {ctor: '[]'},
 	selectedUrl: _elm_lang$core$Maybe$Nothing,
 	loadingError: _elm_lang$core$Maybe$Nothing,
-	chosenSize: _user$project$PhotoGroove$Medium
+	chosenSize: _user$project$PhotoGroove$Medium,
+	hue: 0,
+	ripple: 0,
+	noise: 0
 };
 var _user$project$PhotoGroove$Small = {ctor: 'Small'};
 var _user$project$PhotoGroove$view = function (model) {
@@ -9841,13 +9898,13 @@ var _user$project$PhotoGroove$view = function (model) {
 						},
 						{
 							ctor: '::',
-							_0: A2(_user$project$PhotoGroove$viewFilter, 'Hue', 0),
+							_0: A3(_user$project$PhotoGroove$viewFilter, 'Hue', _user$project$PhotoGroove$SetHue, model.hue),
 							_1: {
 								ctor: '::',
-								_0: A2(_user$project$PhotoGroove$viewFilter, 'Ripple', 0),
+								_0: A3(_user$project$PhotoGroove$viewFilter, 'Ripple', _user$project$PhotoGroove$SetRipple, model.ripple),
 								_1: {
 									ctor: '::',
-									_0: A2(_user$project$PhotoGroove$viewFilter, 'Noise', 0),
+									_0: A3(_user$project$PhotoGroove$viewFilter, 'Noise', _user$project$PhotoGroove$SetNoise, model.noise),
 									_1: {ctor: '[]'}
 								}
 							}
