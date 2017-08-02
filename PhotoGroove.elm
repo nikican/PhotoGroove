@@ -1,4 +1,4 @@
-module PhotoGroove exposing (..)
+port module PhotoGroove exposing (..)
 
 import Html exposing (..)
 import Html.Attributes as Attr exposing (id, class, classList, src, name, type_, title, checked, max)
@@ -33,6 +33,15 @@ type alias Model =
     , hue : Int
     , ripple : Int
     , noise : Int
+    }
+
+
+port setFilters : FilterOptions -> Cmd msg
+
+
+type alias FilterOptions =
+    { url : String
+    , filters : List { name : String, amount : Float }
     }
 
 
@@ -171,9 +180,9 @@ viewLarge selectedUrl =
             text ""
 
         Just url ->
-            img
-                [ class "large"
-                , src (urlPrefix ++ "large/" ++ url)
+            canvas
+                [ id "main-canvas"
+                , class "large"
                 ]
                 []
 
@@ -181,8 +190,8 @@ viewLarge selectedUrl =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SelectByUrl url ->
-            ( { model | selectedUrl = Just url }, Cmd.none )
+        SelectByUrl selectedUrl ->
+            applyFilters { model | selectedUrl = Just selectedUrl }
 
         SurpriseMe ->
             let
@@ -203,19 +212,14 @@ update msg model =
                         |> Array.get index
                         |> Maybe.map .url
             in
-                ( { model
-                    | selectedUrl = newSelectedUrl
-                  }
-                , Cmd.none
-                )
+                applyFilters { model | selectedUrl = newSelectedUrl }
 
         LoadPhotos (Ok photos) ->
-            ( { model
-                | photos = photos
-                , selectedUrl = Maybe.map .url (List.head photos)
-              }
-            , Cmd.none
-            )
+            applyFilters
+                { model
+                    | photos = photos
+                    , selectedUrl = Maybe.map .url (List.head photos)
+                }
 
         LoadPhotos (Err _) ->
             ( { model
@@ -225,22 +229,38 @@ update msg model =
             )
 
         SetHue hue ->
-            { model
-                | hue = hue
-            }
-                ! []
+            applyFilters { model | hue = hue }
 
         SetRipple ripple ->
-            { model
-                | ripple = ripple
-            }
-                ! []
+            applyFilters { model | ripple = ripple }
 
         SetNoise noise ->
-            { model
-                | noise = noise
-            }
-                ! []
+            applyFilters { model | noise = noise }
+
+
+applyFilters : Model -> ( Model, Cmd Msg )
+applyFilters model =
+    case model.selectedUrl of
+        Just selectedUrl ->
+            let
+                filters =
+                    [ { name = "Hue", amount = convertToPercent model.hue }
+                    , { name = "Ripple", amount = convertToPercent model.ripple }
+                    , { name = "Noise", amount = convertToPercent model.noise }
+                    ]
+
+                url =
+                    urlPrefix ++ "large/" ++ selectedUrl
+            in
+                ( model, setFilters { url = url, filters = filters } )
+
+        Nothing ->
+            model ! []
+
+
+convertToPercent : Int -> Float
+convertToPercent amount =
+    toFloat amount / 11
 
 
 paperSlider : List (Attribute msg) -> List (Html msg) -> Html msg
