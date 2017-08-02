@@ -9907,6 +9907,22 @@ var _user$project$PhotoGroove$initialModel = {
 	noise: 0,
 	status: ''
 };
+var _user$project$PhotoGroove$init = function (flags) {
+	var status = A2(
+		_elm_lang$core$Basics_ops['++'],
+		'Initializing Pasta v',
+		_elm_lang$core$Basics$toString(flags));
+	return A2(
+		_elm_lang$core$Platform_Cmd_ops['!'],
+		_elm_lang$core$Native_Utils.update(
+			_user$project$PhotoGroove$initialModel,
+			{status: status}),
+		{
+			ctor: '::',
+			_0: _user$project$PhotoGroove$initialCmd,
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$PhotoGroove$Small = {ctor: 'Small'};
 var _user$project$PhotoGroove$view = function (model) {
 	return A2(
@@ -10079,15 +10095,15 @@ var _user$project$PhotoGroove$viewOrError = function (model) {
 			});
 	}
 };
-var _user$project$PhotoGroove$main = _elm_lang$html$Html$program(
+var _user$project$PhotoGroove$main = _elm_lang$html$Html$programWithFlags(
 	{
-		init: {ctor: '_Tuple2', _0: _user$project$PhotoGroove$initialModel, _1: _user$project$PhotoGroove$initialCmd},
+		init: _user$project$PhotoGroove$init,
 		view: _user$project$PhotoGroove$viewOrError,
 		update: _user$project$PhotoGroove$update,
 		subscriptions: function (_p7) {
 			return _user$project$PhotoGroove$statusChanges(_user$project$PhotoGroove$SetStatus);
 		}
-	})();
+	})(_elm_lang$core$Json_Decode$float);
 
 var Elm = {};
 Elm['PhotoGroove'] = Elm['PhotoGroove'] || {};
