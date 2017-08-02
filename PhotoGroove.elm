@@ -33,10 +33,14 @@ type alias Model =
     , hue : Int
     , ripple : Int
     , noise : Int
+    , status : String
     }
 
 
 port setFilters : FilterOptions -> Cmd msg
+
+
+port statusChanges : (String -> msg) -> Sub msg
 
 
 type alias FilterOptions =
@@ -54,6 +58,7 @@ initialModel =
     , hue = 0
     , ripple = 0
     , noise = 0
+    , status = ""
     }
 
 
@@ -66,6 +71,7 @@ type Msg
     | SetHue Int
     | SetRipple Int
     | SetNoise Int
+    | SetStatus String
 
 
 type ThumbnailSize
@@ -99,6 +105,7 @@ view model =
         , button
             [ onClick SurpriseMe ]
             [ text "Surprise Me!" ]
+        , div [ class "status" ] [ text model.status ]
         , div [ class "filters" ]
             [ viewFilter "Hue" SetHue model.hue
             , viewFilter "Ripple" SetRipple model.ripple
@@ -237,6 +244,9 @@ update msg model =
         SetNoise noise ->
             applyFilters { model | noise = noise }
 
+        SetStatus status ->
+            { model | status = status } ! []
+
 
 applyFilters : Model -> ( Model, Cmd Msg )
 applyFilters model =
@@ -288,5 +298,5 @@ main =
         { init = ( initialModel, initialCmd )
         , view = viewOrError
         , update = update
-        , subscriptions = (\_ -> Sub.none)
+        , subscriptions = (\_ -> statusChanges SetStatus)
         }
