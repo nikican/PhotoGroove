@@ -44,19 +44,22 @@ selectByUrlSelectsPhoto =
                 |> .selectedUrl
                 |> Expect.equal (Just url)
 
+
 loadPhotosSelectsFirstPhoto : Test
 loadPhotosSelectsFirstPhoto =
     fuzz (list string) "LoadPhotos selects the first photo" <|
-    \urls ->
+        \urls ->
             let
                 photos =
-                List.map photoFromUrl urls
+                    List.map photoFromUrl urls
             in
                 PhotoGroove.initialModel
-                |> PhotoGroove.update (LoadPhotos (Ok photos))
-                |> Tuple.first
-                |> .selectedUrl
-                |> Expect.equal (List.head urls)
-                    photoFromUrl : String -> Photo
-                    photoFromUrl url =
-                    { url = url, size = 0, title = "" }
+                    |> PhotoGroove.update (LoadPhotos (Ok photos))
+                    |> Tuple.first
+                    |> .selectedUrl
+                    |> Expect.equal (List.head urls)
+
+
+photoFromUrl : String -> Photo
+photoFromUrl url =
+    { url = url, size = 0, title = "" }
