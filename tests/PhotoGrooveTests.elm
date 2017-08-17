@@ -57,6 +57,6 @@ loadPhotosSelectsFirstPhoto =
                 |> Tuple.first
                 |> .selectedUrl
                 |> Expect.equal (List.head urls)
-                photoFromUrl : String -> Photo
-                photoFromUrl url =
-                { url = url, size = 0, title = "" }
+                    photoFromUrl : String -> Photo
+                    photoFromUrl url =
+                    { url = url, size = 0, title = "" }
