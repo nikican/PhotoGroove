@@ -34,30 +34,28 @@ decoderFuzzTest =
                 |> Expect.equal (Ok "(untitled)")
 
 
-selectByUrlSelectsPhoto : Test
-selectByUrlSelectsPhoto =
-    fuzz string " SelectByUrl selects the given photo by URL " <|
-        \url ->
-            PhotoGroove.initialModel
-                |> PhotoGroove.update (SelectByUrl url)
-                |> Tuple.first
-                |> .selectedUrl
-                |> Expect.equal (Just url)
-
-
-loadPhotosSelectsFirstPhoto : Test
-loadPhotosSelectsFirstPhoto =
-    fuzz (list string) "LoadPhotos selects the first photo" <|
-        \urls ->
-            let
-                photos =
-                    List.map photoFromUrl urls
-            in
+stateTransitions : Test
+stateTransitions =
+    describe "state transitions"
+        [ fuzz string "SelectByUrl selects the given photo by URL" <|
+            \url ->
                 PhotoGroove.initialModel
-                    |> PhotoGroove.update (LoadPhotos (Ok photos))
+                    |> PhotoGroove.update (SelectByUrl url)
                     |> Tuple.first
                     |> .selectedUrl
-                    |> Expect.equal (List.head urls)
+                    |> Expect.equal (Just url)
+        , fuzz (list string) "LoadPhotos selects the first photo" <|
+            \urls ->
+                let
+                    photos =
+                        List.map photoFromUrl urls
+                in
+                    PhotoGroove.initialModel
+                        |> PhotoGroove.update (LoadPhotos (Ok photos))
+                        |> Tuple.first
+                        |> .selectedUrl
+                        |> Expect.equal (List.head urls)
+        ]
 
 
 photoFromUrl : String -> Photo
